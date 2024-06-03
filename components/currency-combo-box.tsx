@@ -20,7 +20,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { SkeletonWrapper } from "./skeleton-wrapper";
 import { User } from "@prisma/client";
-import { updateUserCurrency } from "@/app/wizard/actions/user-settings";
+import { updateUserCurrency } from "@/app/wizard/__actions/user-settings";
 import { toast } from "sonner";
 
 async function getUserSettings() {
