@@ -25,10 +25,9 @@ export default async function Wizard() {
       className=" container flex max-w-2xl flex-col
     items-center justify-between gap-4">
       <h1 className="text-center text-3xl">
-        Welcome,{" "}
-        <span className="ml-2 font-bold">
-          {user.firstName?.charAt(0).toLocaleUpperCase()! +
-            user.firstName?.slice(1)!}
+        Welcome,
+        <span className="ml-2 font-bold capitalize">
+          {user.firstName}
           🔥
         </span>
       </h1>
