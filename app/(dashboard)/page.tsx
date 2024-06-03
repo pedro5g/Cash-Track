@@ -1,7 +1,6 @@
 import { CrateTransactionDialog } from "@/components/__dashboard/create-transaction-dialog";
 import { Button } from "@/components/ui/button";
 import prisma from "@/lib/prisma";
-import { capitalized } from "@/lib/utils";
 import { currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 
