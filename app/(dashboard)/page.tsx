@@ -1,4 +1,5 @@
-import { CrateTransactionDialog } from "@/components/__dashboard/create-transaction-dialog";
+import { CreateTransactionDialog } from "@/components/__dashboard/create-transaction-dialog";
+import { Overview } from "@/components/__dashboard/overview";
 import { Button } from "@/components/ui/button";
 import prisma from "@/lib/prisma";
 import { currentUser } from "@clerk/nextjs/server";
@@ -33,25 +34,26 @@ export default async function Dashboard() {
             Hello, <span className=" capitalize">{user.firstName}</span> ! 👋
           </p>
           <div className=" flex items-center gap-3">
-            <CrateTransactionDialog type="income">
+            <CreateTransactionDialog type="income">
               <Button
                 variant="outline"
                 className="border-emerald-500 
       bg-emerald-950 text-white hover:bg-emerald-700 hover:text-white">
                 New Income💲
               </Button>
-            </CrateTransactionDialog>
-            <CrateTransactionDialog type="expense">
+            </CreateTransactionDialog>
+            <CreateTransactionDialog type="expense">
               <Button
                 variant="outline"
                 className="border-rose-500 
       bg-rose-950 text-white hover:bg-rose-700 hover:text-white">
                 New expense 😪
               </Button>
-            </CrateTransactionDialog>
+            </CreateTransactionDialog>
           </div>
         </div>
       </div>
+      <Overview userSettings={userSettings} />
     </main>
   );
 }

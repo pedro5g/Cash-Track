@@ -44,7 +44,7 @@ interface CrateTransactionDialogProps {
   type: TransactionType;
 }
 
-export const CrateTransactionDialog = ({
+export const CreateTransactionDialog = ({
   children,
   type,
 }: CrateTransactionDialogProps) => {

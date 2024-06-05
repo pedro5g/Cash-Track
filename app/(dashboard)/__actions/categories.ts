@@ -2,14 +2,14 @@
 
 import prisma from "@/lib/prisma";
 import {
-  CreateCategorySchema,
+  createCategorySchema,
   CreateCategorySchemaType,
 } from "@/schema/categories";
 import { currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 
 export async function createCategory(form: CreateCategorySchemaType) {
-  const parseBody = CreateCategorySchema.safeParse(form);
+  const parseBody = createCategorySchema.safeParse(form);
 
   if (!parseBody.success) {
     throw new Error("Bad request");
