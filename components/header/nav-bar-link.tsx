@@ -12,7 +12,7 @@ interface NavBarLinkProps {
 
 export const NavBarLink = ({ href, label, callBack }: NavBarLinkProps) => {
   const pathName = usePathname();
-  const isActive = pathName.startsWith(href);
+  const isActive = pathName === href;
 
   return (
     <div className="relative flex items-center">

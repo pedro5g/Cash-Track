@@ -3,6 +3,7 @@
 import prisma from "@/lib/prisma";
 import { updateUserCurrencySchema } from "@/schema/user-settings";
 import { currentUser } from "@clerk/nextjs/server";
+import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 export async function updateUserCurrency(currency: string) {
@@ -23,6 +24,8 @@ export async function updateUserCurrency(currency: string) {
       currency,
     },
   });
+
+  revalidatePath("/dashboard");
 
   return userSettings;
 }

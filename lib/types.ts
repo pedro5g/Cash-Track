@@ -6,7 +6,7 @@ export type CategoryType = {
   name: string;
   userId: string;
   icon: string;
-  type: string;
+  type: TransactionType;
 };
 
 export type UserSettingsType = {
