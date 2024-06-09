@@ -51,7 +51,7 @@ export async function GET(request: Request) {
 
   const stats = await getCategoriesStats(user.id, from, to);
 
-  console.log("stats", stats);
+  // console.log("stats", stats);
 
   return Response.json(stats);
 }

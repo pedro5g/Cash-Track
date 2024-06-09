@@ -1,4 +1,5 @@
 import { CreateTransactionDialog } from "@/components/__dashboard/create-transaction-dialog";
+import { History } from "@/components/__dashboard/history";
 import { Overview } from "@/components/__dashboard/overview";
 import { Button } from "@/components/ui/button";
 import prisma from "@/lib/prisma";
@@ -54,6 +55,7 @@ export default async function Dashboard() {
         </div>
       </div>
       <Overview userSettings={userSettings} />
+      <History userSettings={userSettings} />
     </main>
   );
 }

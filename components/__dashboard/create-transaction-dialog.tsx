@@ -208,7 +208,7 @@ export const CreateTransactionDialog = ({
                             mode="single"
                             selected={field.value}
                             onSelect={(value) => {
-                              if (value) return;
+                              if (!value) return;
                               field.onChange(value);
                             }}
                             initialFocus
