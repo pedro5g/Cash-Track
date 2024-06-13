@@ -9,15 +9,17 @@ import { HistoryPeriodSelector } from "./history-period-selector";
 import { useQuery } from "@tanstack/react-query";
 import { SkeletonWrapper } from "../skeleton-wrapper";
 import {
-  Bar,
   BarChart,
   CartesianGrid,
   ResponsiveContainer,
   Tooltip,
+  Bar,
   XAxis,
   YAxis,
 } from "recharts";
 import { CustomTooltip } from "./custom-tooltip";
+
+import { GetHistoryDataResponse } from "@/app/api/history-data/route";
 
 interface HistoryProps {
   userSettings: UserSettingsType;
@@ -40,7 +42,7 @@ export const History = ({ userSettings }: HistoryProps) => {
     return getFormatterCurrency(userSettings.currency);
   }, [userSettings.currency]);
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading } = useQuery<GetHistoryDataResponse>({
     queryKey: ["overview", "history", timeFrame, period],
     queryFn: () =>
       getHistory(timeFrame, period.month.toString(), period.year.toString()),

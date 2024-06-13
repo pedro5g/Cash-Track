@@ -20,15 +20,23 @@ import { cn } from "@/lib/utils";
 interface CategoryPickerProps {
   type: TransactionType;
   onChange: (value: string) => void;
+  defaultValue?: string;
 }
 
 async function getCategories(type: TransactionType) {
   return await fetch(`/api/categories?type=${type}`).then((res) => res.json());
 }
 
-export const CategoryPicker = ({ type, onChange }: CategoryPickerProps) => {
+export const CategoryPicker = ({
+  type,
+  onChange,
+  defaultValue,
+}: CategoryPickerProps) => {
   const [open, setOpen] = useState(false);
-  const [value, setValue] = useState("");
+  const [value, setValue] = useState(() => {
+    if (defaultValue) return defaultValue;
+    return "";
+  });
 
   const { data } = useQuery<CategoryType[]>({
     queryKey: ["categories", type],
