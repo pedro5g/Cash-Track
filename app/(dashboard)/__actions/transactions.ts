@@ -1,5 +1,6 @@
 "use server";
 
+import { handleDeleteFile } from "@/lib/firebase";
 import prisma from "@/lib/prisma";
 import {
   createTransactionSchema,
@@ -23,7 +24,7 @@ export async function createTransaction(form: CreateTransactionSchemaType) {
     redirect("/sign-in");
   }
 
-  const { amount, category, date, type, description } = parseBody.data;
+  const { amount, category, date, type, description, doc } = parseBody.data;
 
   const categoryRow = await prisma.category.findFirst({
     where: {
@@ -35,73 +36,82 @@ export async function createTransaction(form: CreateTransactionSchemaType) {
   if (!categoryRow) {
     throw new Error(`The category: ${category} it's not registered.`);
   }
-
-  await prisma.$transaction([
-    // Start prisma $transaction to create a user transaction
-    prisma.transaction.create({
-      data: {
-        userId: user.id,
-        amount,
-        date,
-        description: description ?? "",
-        type,
-        category: categoryRow.name,
-        categoryIcon: categoryRow.icon,
-      },
-    }),
-    // then update moth aggregate table
-    prisma.monthHistory.upsert({
-      where: {
-        day_month_year_userId: {
+  try {
+    await prisma.$transaction([
+      // Start prisma $transaction to create a user transaction
+      prisma.transaction.create({
+        data: {
+          userId: user.id,
+          amount,
+          date,
+          description: description ?? "",
+          type,
+          category: categoryRow.name,
+          categoryIcon: categoryRow.icon,
+          fileName: doc?.fileName,
+          filePath: doc?.filePath,
+        },
+      }),
+      // then update moth aggregate table
+      prisma.monthHistory.upsert({
+        where: {
+          day_month_year_userId: {
+            userId: user.id,
+            day: date.getUTCDate(),
+            month: date.getUTCMonth(),
+            year: date.getUTCFullYear(),
+          },
+        },
+        create: {
           userId: user.id,
           day: date.getUTCDate(),
           month: date.getUTCMonth(),
           year: date.getUTCFullYear(),
+          expense: type === "expense" ? amount : 0,
+          income: type === "income" ? amount : 0,
         },
-      },
-      create: {
-        userId: user.id,
-        day: date.getUTCDate(),
-        month: date.getUTCMonth(),
-        year: date.getUTCFullYear(),
-        expense: type === "expense" ? amount : 0,
-        income: type === "income" ? amount : 0,
-      },
-      update: {
-        expense: {
-          increment: type === "expense" ? amount : 0,
+        update: {
+          expense: {
+            increment: type === "expense" ? amount : 0,
+          },
+          income: {
+            increment: type === "income" ? amount : 0,
+          },
         },
-        income: {
-          increment: type === "income" ? amount : 0,
+      }),
+      // end update year aggregate table
+      prisma.yearHistory.upsert({
+        where: {
+          month_year_userId: {
+            userId: user.id,
+            month: date.getUTCMonth(),
+            year: date.getUTCFullYear(),
+          },
         },
-      },
-    }),
-    // end update year aggregate table
-    prisma.yearHistory.upsert({
-      where: {
-        month_year_userId: {
+        create: {
           userId: user.id,
           month: date.getUTCMonth(),
           year: date.getUTCFullYear(),
+          expense: type === "expense" ? amount : 0,
+          income: type === "income" ? amount : 0,
         },
-      },
-      create: {
-        userId: user.id,
-        month: date.getUTCMonth(),
-        year: date.getUTCFullYear(),
-        expense: type === "expense" ? amount : 0,
-        income: type === "income" ? amount : 0,
-      },
-      update: {
-        expense: {
-          increment: type === "expense" ? amount : 0,
+        update: {
+          expense: {
+            increment: type === "expense" ? amount : 0,
+          },
+          income: {
+            increment: type === "income" ? amount : 0,
+          },
         },
-        income: {
-          increment: type === "income" ? amount : 0,
-        },
-      },
-    }),
-  ]);
+      }),
+    ]);
+  } catch (error) {
+    if (doc?.filePath) {
+      await handleDeleteFile(doc.filePath);
+      // console.log("File deleted to success !");
+    }
+    throw new Error(`Something went wrong to create transaction`);
+  }
 }
 
 export async function updateTransaction(
@@ -252,55 +262,63 @@ export async function deleteTransaction(form: DeleteTransactionSchemaType) {
     throw new Error("Bad request");
   }
 
-  await prisma.$transaction([
-    prisma.transaction.delete({
-      where: {
-        id,
-        userId: user.id,
-      },
-    }),
-    prisma.monthHistory.update({
-      where: {
-        day_month_year_userId: {
+  try {
+    await prisma.$transaction([
+      prisma.transaction.delete({
+        where: {
+          id,
           userId: user.id,
-          day: transaction.date.getUTCDate(),
-          month: transaction.date.getUTCMonth(),
-          year: transaction.date.getUTCFullYear(),
         },
-      },
-      data: {
-        ...(transaction.type === "expense" && {
-          expense: {
-            decrement: transaction.amount,
+      }),
+      prisma.monthHistory.update({
+        where: {
+          day_month_year_userId: {
+            userId: user.id,
+            day: transaction.date.getUTCDate(),
+            month: transaction.date.getUTCMonth(),
+            year: transaction.date.getUTCFullYear(),
           },
-        }),
-        ...(transaction.type === "income" && {
-          income: {
-            decrement: transaction.amount,
-          },
-        }),
-      },
-    }),
-    prisma.yearHistory.update({
-      where: {
-        month_year_userId: {
-          userId: user.id,
-          month: transaction.date.getUTCMonth(),
-          year: transaction.date.getUTCFullYear(),
         },
-      },
-      data: {
-        ...(transaction.type === "expense" && {
-          expense: {
-            decrement: transaction.amount,
+        data: {
+          ...(transaction.type === "expense" && {
+            expense: {
+              decrement: transaction.amount,
+            },
+          }),
+          ...(transaction.type === "income" && {
+            income: {
+              decrement: transaction.amount,
+            },
+          }),
+        },
+      }),
+      prisma.yearHistory.update({
+        where: {
+          month_year_userId: {
+            userId: user.id,
+            month: transaction.date.getUTCMonth(),
+            year: transaction.date.getUTCFullYear(),
           },
-        }),
-        ...(transaction.type === "income" && {
-          income: {
-            decrement: transaction.amount,
-          },
-        }),
-      },
-    }),
-  ]);
+        },
+        data: {
+          ...(transaction.type === "expense" && {
+            expense: {
+              decrement: transaction.amount,
+            },
+          }),
+          ...(transaction.type === "income" && {
+            income: {
+              decrement: transaction.amount,
+            },
+          }),
+        },
+      }),
+    ]);
+    if (transaction.filePath) {
+      await handleDeleteFile(transaction.filePath);
+      // console.log("Transaction deleted with success!");
+    }
+  } catch (error) {
+    throw new Error("Something went wrong to delete transaction");
+  }
 }

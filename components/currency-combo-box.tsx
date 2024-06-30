@@ -141,8 +141,10 @@ const OptionList = ({
               value={option.value}
               onSelect={(value) => {
                 setSelectedOption(
-                  Currencies.find((priority) => priority.value === value) ||
-                    null
+                  Currencies.find(
+                    (priority) =>
+                      priority.value.toLowerCase() === value.toLowerCase()
+                  ) || null
                 );
                 setOpen(false);
               }}>

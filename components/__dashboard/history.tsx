@@ -47,6 +47,7 @@ export const History = ({ userSettings }: HistoryProps) => {
     queryFn: () =>
       getHistory(timeFrame, period.month.toString(), period.year.toString()),
   });
+  const chartKey = `chart-${timeFrame}`;
 
   return (
     <div className="container">
@@ -64,13 +65,13 @@ export const History = ({ userSettings }: HistoryProps) => {
               <Badge
                 variant="outline"
                 className="flex items-center gap-2 text-sm">
-                <div className="h-4 w-4 rounded-full bg-emerald-500"></div>
+                <div className="h-4 w-4 rounded-full bg-emerald-500" />
                 Income
               </Badge>
               <Badge
                 variant="outline"
                 className="flex items-center gap-2 text-sm">
-                <div className="h-4 w-4 rounded-full bg-red-500"></div>
+                <div className="h-4 w-4 rounded-full bg-red-500" />
                 Expense
               </Badge>
             </div>
@@ -80,7 +81,11 @@ export const History = ({ userSettings }: HistoryProps) => {
           <SkeletonWrapper isLoading={isLoading}>
             {data && (
               <ResponsiveContainer width={"100%"} height={300}>
-                <BarChart height={300} data={data} barCategoryGap={5}>
+                <BarChart
+                  key={chartKey}
+                  height={300}
+                  data={data}
+                  barCategoryGap={5}>
                   <defs>
                     <linearGradient id="incomeBar" x1="0" y1="0" x2="0" y2="1">
                       <stop

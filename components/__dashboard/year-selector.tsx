@@ -25,7 +25,7 @@ export const YearSelector = ({
       onValueChange={(value) => {
         setPeriod({ month: period.month, year: Number(value) });
       }}>
-      <SelectTrigger className="w-[11.25rem]">
+      <SelectTrigger className=" w-[11.25rem]">
         <SelectValue />
       </SelectTrigger>
       <SelectContent>

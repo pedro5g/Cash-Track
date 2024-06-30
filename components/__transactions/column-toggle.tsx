@@ -20,10 +20,7 @@ export const ColumnToggle = <TData, _>({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button
-          variant="outline"
-          size="sm"
-          className=" ml-auto hidden lg:inline-flex">
+        <Button variant="outline" size="sm" className=" ml-auto lg:inline-flex">
           <SlidersHorizontal className="mr-2 size-4" />
           View
         </Button>

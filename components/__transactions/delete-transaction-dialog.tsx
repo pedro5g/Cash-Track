@@ -1,6 +1,7 @@
 "use client";
 
 import { deleteTransaction } from "@/app/(dashboard)/__actions/transactions";
+import { GetTransactionHistoryResponse } from "@/app/api/transactions-history/route";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -18,20 +19,20 @@ import { toast } from "sonner";
 interface DeleteTransactionDialogProps {
   open: boolean;
   setOpen: (value: boolean) => void;
-  transactionId: string;
+  transaction: GetTransactionHistoryResponse[0];
 }
 
 export const DeleteTransactionDialog = ({
   open,
   setOpen,
-  transactionId,
+  transaction,
 }: DeleteTransactionDialogProps) => {
   const queryClient = useQueryClient();
   const { mutate } = useMutation({
     mutationFn: deleteTransaction,
     onSuccess: async () => {
       toast.success(`Transaction deleted successfully`, {
-        id: transactionId,
+        id: transaction.id,
       });
 
       await queryClient.invalidateQueries({
@@ -40,10 +41,20 @@ export const DeleteTransactionDialog = ({
     },
     onError: () => {
       toast.error(`Something went wrong`, {
-        id: transactionId,
+        id: transaction.id,
       });
     },
   });
+
+  const handleDelete = async (
+    transaction: GetTransactionHistoryResponse[0]
+  ) => {
+    toast.loading(`Deleting transaction...`, {
+      id: transaction.id,
+    });
+
+    mutate({ transactionId: transaction.id });
+  };
 
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
@@ -56,16 +67,10 @@ export const DeleteTransactionDialog = ({
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>
+          <AlertDialogCancel asChild>
             <Button variant="ghost">Cancel</Button>
           </AlertDialogCancel>
-          <AlertDialogAction
-            onClick={() => {
-              toast.loading(`Deleting transaction...`, {
-                id: transactionId,
-              });
-              mutate({ transactionId });
-            }}>
+          <AlertDialogAction onClick={() => handleDelete(transaction)}>
             Continue
           </AlertDialogAction>
         </AlertDialogFooter>

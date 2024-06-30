@@ -59,7 +59,7 @@ export const DeleteCategoryDialog = ({
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>
+          <AlertDialogCancel asChild>
             <Button variant="ghost">Cancel</Button>
           </AlertDialogCancel>
           <AlertDialogAction

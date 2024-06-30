@@ -28,9 +28,11 @@ import { useMemo, useState } from "react";
 import { FacetedFilter } from "./faceted-filter";
 import { ColumnToggle } from "./column-toggle";
 import { mkConfig, generateCsv, download } from "export-to-csv";
-import { DownloadIcon } from "lucide-react";
+import { DownloadIcon, FolderOpen } from "lucide-react";
 import { RowActions } from "./row-actions";
-import { Button } from "../ui/button";
+import { buttonVariants, Button } from "../ui/button";
+import Link from "next/link";
+import { PDFIcon } from "../icon";
 
 interface TransactionTableProps {
   from: Date;
@@ -49,7 +51,7 @@ type TransactionHistoryRow = GetTransactionHistoryResponse[0];
 const columns: ColumnDef<TransactionHistoryRow>[] = [
   {
     accessorKey: "category",
-    header: ({ column }) => <ColumnHeader column={column} title="Category" />,
+    header: () => <span>Category</span>,
     filterFn: (row, id, value) => {
       return value.includes(row.getValue(id));
     },
@@ -62,9 +64,7 @@ const columns: ColumnDef<TransactionHistoryRow>[] = [
   },
   {
     accessorKey: "description",
-    header: ({ column }) => (
-      <ColumnHeader column={column} title="Description" />
-    ),
+    header: () => <span>Description</span>,
     cell: ({ row }) => (
       <div className="capitalize">{row.original.description}</div>
     ),
@@ -85,7 +85,7 @@ const columns: ColumnDef<TransactionHistoryRow>[] = [
   },
   {
     accessorKey: "type",
-    header: ({ column }) => <ColumnHeader column={column} title="Type" />,
+    header: () => <span>Type</span>,
     filterFn: (row, id, value) => {
       return value.includes(row.getValue(id));
     },
@@ -109,6 +109,22 @@ const columns: ColumnDef<TransactionHistoryRow>[] = [
         {row.original.formattedAmount}
       </p>
     ),
+  },
+  {
+    accessorKey: "filePath",
+    header: () => <span>Doc</span>,
+    cell: ({ row }) => {
+      return (
+        row.original.filePath && (
+          <Link
+            href={row.original.filePath}
+            target="_blank"
+            className={cn(buttonVariants({ variant: "ghost" }))}>
+            <PDFIcon className=" size-5" />
+          </Link>
+        )
+      );
+    },
   },
   {
     id: "actions",
@@ -172,7 +188,7 @@ export const TransactionTable = ({ from, to }: TransactionTableProps) => {
 
   return (
     <div className=" w-full">
-      <div className=" flex flex-wrap items-end justify-between gap-2 py-4">
+      <div className=" flex flex-wrap items-start justify-between gap-2 py-4">
         <div className=" flex gap-2 ">
           {table.getColumn("category") && (
             <FacetedFilter

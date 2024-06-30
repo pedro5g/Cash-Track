@@ -129,7 +129,7 @@ export const UpdateTransaction = ({
                 <FormItem>
                   <FormLabel>Description</FormLabel>
                   <FormControl>
-                    <Input defaultValue={transaction.description} {...field} />
+                    <Input {...field} />
                   </FormControl>
                   <FormDescription>
                     Transaction description (optional)
@@ -144,11 +144,7 @@ export const UpdateTransaction = ({
                 <FormItem>
                   <FormLabel>Amount</FormLabel>
                   <FormControl>
-                    <Input
-                      defaultValue={transaction.amount}
-                      {...field}
-                      type="number"
-                    />
+                    <Input {...field} type="number" />
                   </FormControl>
                   <FormDescription>
                     Transaction amount (required)
@@ -226,7 +222,7 @@ export const UpdateTransaction = ({
             </div>
           </form>
         </Form>
-        <DialogFooter>
+        <DialogFooter className=" gap-2">
           <DialogClose asChild>
             <Button
               type="button"

@@ -60,10 +60,11 @@ export const CategoriesCard = ({
                         {formatter.format(amount)}
                       </span>
                     </div>
+
                     <Progress
                       value={percentage}
                       indicator={
-                        type === "income" ? "bg-emerald-500" : "bg-red-500"
+                        type === "income" ? "bg-emerald-500" : "bg-red-500 "
                       }
                     />
                   </div>

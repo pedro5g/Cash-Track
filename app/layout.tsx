@@ -8,7 +8,7 @@ import { Toaster } from "@/components/ui/sonner";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Budget Tracker",
+  title: "Cash Track",
   description: "Budget Tracker an app for you",
 };
 
@@ -25,9 +25,9 @@ export default function RootLayout({
         colorScheme: "dark",
       }}>
       <ClerkProvider signInForceRedirectUrl={"/wizard"}>
-        <Toaster richColors position="bottom-right" />
         <body className={inter.className}>
           <RootProvider>{children}</RootProvider>
+          <Toaster richColors position="bottom-right" />
         </body>
       </ClerkProvider>
     </html>

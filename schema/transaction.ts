@@ -2,10 +2,16 @@ import { z } from "zod";
 
 export const createTransactionSchema = z.object({
   amount: z.coerce.number().positive().multipleOf(0.01),
-  description: z.string().optional(),
+  description: z.string(),
   date: z.coerce.date(),
   category: z.string(),
   type: z.union([z.literal("income"), z.literal("expense")]),
+  doc: z
+    .object({
+      fileName: z.string(),
+      filePath: z.string().url(),
+    })
+    .optional(),
 });
 
 export type CreateTransactionSchemaType = z.infer<

@@ -27,7 +27,7 @@ export const RowActions = ({ transaction }: RowActionsProps) => {
       <DeleteTransactionDialog
         open={open}
         setOpen={setOpen}
-        transactionId={transaction.id}
+        transaction={transaction}
       />
       <UpdateTransaction
         open={openUpdateModel}

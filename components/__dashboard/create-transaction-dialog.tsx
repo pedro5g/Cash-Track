@@ -38,6 +38,9 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createTransaction } from "@/app/(dashboard)/__actions/transactions";
 import { toast } from "sonner";
 import { dateToUTCDate } from "@/lib/utils";
+import { Dropzone } from "../dropzone";
+
+import { handleFileUpload } from "@/lib/firebase";
 
 interface CrateTransactionDialogProps {
   children: React.ReactNode;
@@ -48,15 +51,23 @@ export const CreateTransactionDialog = ({
   children,
   type,
 }: CrateTransactionDialogProps) => {
+  const [doc, setDoc] = useState<File | null>(null);
   const [open, setOpen] = useState(false);
 
   const form = useForm<CreateTransactionSchemaType>({
     resolver: zodResolver(createTransactionSchema),
     defaultValues: {
       type,
+      description: "",
       date: new Date(),
+      amount: 0,
     },
   });
+
+  const handleFileChange = useCallback((value: File | null) => {
+    setDoc(value);
+    // console.log("file", value);
+  }, []);
 
   const handleCategoryChange = useCallback(
     (value: string) => {
@@ -80,7 +91,9 @@ export const CreateTransactionDialog = ({
         amount: 0,
         date: new Date(),
         category: undefined,
+        doc: undefined,
       });
+      setDoc(null);
 
       queryClient.invalidateQueries({
         queryKey: ["overview"],
@@ -88,25 +101,39 @@ export const CreateTransactionDialog = ({
 
       setOpen((prev) => !prev);
     },
-    onError: () => {
-      toast.success("Something went wrong ", {
+    onError: (error) => {
+      console.log("error", error);
+      toast.error("Something went wrong ", {
         id: "create-transaction",
       });
     },
   });
 
   const onSubmit = useCallback(
-    (value: CreateTransactionSchemaType) => {
+    async (value: CreateTransactionSchemaType) => {
       toast.loading("Creating a new transaction...", {
         id: "create-transaction",
       });
+      let fileURL: string | null = null;
+      let fileName: string | null = null;
+
+      if (doc) {
+        try {
+          fileURL = await handleFileUpload(doc);
+          fileName = doc.name;
+        } catch (error) {
+          toast.error("Failed to upload document.");
+          return;
+        }
+      }
 
       mutate({
         ...value,
+        doc: fileURL && fileName ? { fileName, filePath: fileURL } : undefined,
         date: dateToUTCDate(value.date),
       });
     },
-    [mutate]
+    [doc, mutate]
   );
 
   return (
@@ -135,7 +162,7 @@ export const CreateTransactionDialog = ({
                 <FormItem>
                   <FormLabel>Description</FormLabel>
                   <FormControl>
-                    <Input defaultValue={""} {...field} />
+                    <Input {...field} />
                   </FormControl>
                   <FormDescription>
                     Transaction description (optional)
@@ -149,8 +176,9 @@ export const CreateTransactionDialog = ({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Amount</FormLabel>
+
                   <FormControl>
-                    <Input defaultValue={""} {...field} type="number" />
+                    <Input {...field} type="number" />
                   </FormControl>
                   <FormDescription>
                     Transaction amount (required)
@@ -158,6 +186,22 @@ export const CreateTransactionDialog = ({
                 </FormItem>
               )}
             />
+            <FormField
+              control={form.control}
+              name="doc"
+              render={() => (
+                <FormItem>
+                  <FormLabel>Document</FormLabel>
+                  <FormControl>
+                    <Dropzone handleFileChange={handleFileChange} doc={doc} />
+                  </FormControl>
+                  <FormDescription>
+                    Add some pdf for your transaction (optional)
+                  </FormDescription>
+                </FormItem>
+              )}
+            />
+
             <div className=" flex items-center justify-between gap-1">
               <FormField
                 control={form.control}
@@ -227,7 +271,7 @@ export const CreateTransactionDialog = ({
             </div>
           </form>
         </Form>
-        <DialogFooter>
+        <DialogFooter className="gap-2">
           <DialogClose asChild>
             <Button
               type="button"
