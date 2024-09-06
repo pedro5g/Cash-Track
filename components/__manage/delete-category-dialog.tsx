@@ -67,7 +67,10 @@ export const DeleteCategoryDialog = ({
               toast.loading(`Deleting category...`, {
                 id: categoryId,
               });
-              mutate({ name: category.name, type: category.type });
+              mutate({
+                name: category.name,
+                type: category.type as "income" | "expense",
+              });
             }}>
             Continue
           </AlertDialogAction>
