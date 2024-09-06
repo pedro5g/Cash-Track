@@ -122,7 +122,9 @@ export const CreateTransactionDialog = ({
           fileURL = await handleFileUpload(doc);
           fileName = doc.name;
         } catch (error) {
-          toast.error("Failed to upload document.");
+          toast.error("Failed to upload document.", {
+            id: "create-transaction",
+          });
           return;
         }
       }
