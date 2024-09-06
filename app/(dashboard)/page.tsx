@@ -32,7 +32,7 @@ export default async function Dashboard() {
       <div className=" border-b bg-card">
         <div className="container flex flex-wrap items-center justify-between gap-6 py-8">
           <p className=" text-3xl font-bold">
-            Hello, <span className=" capitalize">{user.firstName}</span> ! 👋
+            Hello <span className=" capitalize">{user.firstName}</span> ! 👋
           </p>
           <div className=" flex items-center gap-3">
             <CreateTransactionDialog type="income">
@@ -48,7 +48,7 @@ export default async function Dashboard() {
                 variant="outline"
                 className="border-rose-500 
       bg-rose-950 text-white hover:bg-rose-700 hover:text-white">
-                New expense 😪
+                New Expense 😪
               </Button>
             </CreateTransactionDialog>
           </div>

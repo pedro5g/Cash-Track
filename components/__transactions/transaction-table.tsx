@@ -209,27 +209,29 @@ export const TransactionTable = ({ from, to }: TransactionTableProps) => {
           )}
         </div>
         <div className=" flex flex-wrap gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            className="ml-auto lg:flex"
-            onClick={() => {
-              const data = table.getFilteredRowModel().rows.map((row) => {
-                return {
-                  category: row.original.category,
-                  categoryIcon: row.original.categoryIcon,
-                  description: row.original.description,
-                  type: row.original.type,
-                  amount: row.original.amount,
-                  formattedAmount: row.original.formattedAmount,
-                  date: row.original.date,
-                };
-              });
-              handleExportCSV(data);
-            }}>
-            <DownloadIcon className="mr-2 size-4" />
-            Export CSV
-          </Button>
+          {data && data.length > 0 && (
+            <Button
+              variant="outline"
+              size="sm"
+              className="ml-auto lg:flex"
+              onClick={() => {
+                const data = table.getFilteredRowModel().rows.map((row) => {
+                  return {
+                    category: row.original.category,
+                    categoryIcon: row.original.categoryIcon,
+                    description: row.original.description,
+                    type: row.original.type,
+                    amount: row.original.amount,
+                    formattedAmount: row.original.formattedAmount,
+                    date: row.original.date,
+                  };
+                });
+                handleExportCSV(data);
+              }}>
+              <DownloadIcon className="mr-2 size-4" />
+              Export CSV
+            </Button>
+          )}
           <ColumnToggle table={table} />
         </div>
       </div>

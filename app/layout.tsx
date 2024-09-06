@@ -12,7 +12,7 @@ export const metadata: Metadata = {
   description: "Budget Tracker an app for you",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
