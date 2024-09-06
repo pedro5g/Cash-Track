@@ -62,7 +62,7 @@ export const CreateCategoryDialog = ({
 
   const { mutate, isPending } = useMutation({
     mutationFn: createCategory,
-    onSuccess: async (data: CategoryType) => {
+    onSuccess: async (data) => {
       form.reset({
         name: "",
         icon: "",
