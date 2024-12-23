@@ -6,11 +6,12 @@ import { useDropzone } from "react-dropzone";
 import { Button } from "./ui/button";
 
 interface DropzoneProps {
-  doc: File | null;
+  name: string;
+  value: File | null;
   handleFileChange: (value: File | null) => void;
 }
 
-export const Dropzone = ({ doc, handleFileChange }: DropzoneProps) => {
+export const Dropzone = ({ value, handleFileChange, name }: DropzoneProps) => {
   const onDrop = useCallback(
     (file: File[]) => {
       if (file.length > 0) {
@@ -19,13 +20,13 @@ export const Dropzone = ({ doc, handleFileChange }: DropzoneProps) => {
     },
     [handleFileChange]
   );
-  const MAX_UPLOAD_SIZE = 1024 * 1024 * 3; // 3MB
+  const MAX_UPLOAD_SIZE = 1024 * 1024 * 15; // 3MB
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     maxFiles: 1,
     accept: { "application/pdf": [".pdf"] },
-    disabled: doc !== null,
+    disabled: value !== null,
     maxSize: MAX_UPLOAD_SIZE,
   });
 
@@ -33,7 +34,7 @@ export const Dropzone = ({ doc, handleFileChange }: DropzoneProps) => {
     handleFileChange(null);
   }
 
-  const status = isDragActive || doc ? "active" : "pending";
+  const status = isDragActive || value ? "active" : "pending";
 
   return (
     <div
@@ -43,7 +44,7 @@ export const Dropzone = ({ doc, handleFileChange }: DropzoneProps) => {
       border-dashed border-border text-sm bg-transparent rounded-md overflow-hidden
       data-[status=active]:bg-zinc-500/20
       ">
-      <input {...getInputProps()} />
+      <input {...getInputProps({ name })} />
       {status === "pending" && (
         <div className="flex flex-col items-center gap-1.5">
           <Upload className=" size-5" />
@@ -57,9 +58,9 @@ export const Dropzone = ({ doc, handleFileChange }: DropzoneProps) => {
           ) : (
             <>
               <p className=" text-center text-sm">
-                {doc &&
-                  doc.name.length > 20 &&
-                  doc?.name.substring(0, 20).concat("...")}
+                {value &&
+                  value.name.length > 20 &&
+                  value?.name.substring(0, 20).concat("...")}
               </p>
               <div className=" absolute top-1 right-1">
                 <Button

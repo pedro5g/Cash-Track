@@ -60,7 +60,7 @@ export const CategoryPicker = ({
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button
-          className="w-[12.5rem]  "
+          className="w-full sm:w-[12.5rem]"
           variant="outline"
           role="combobox"
           aria-expanded={open}>

@@ -2,17 +2,9 @@ import { CreateTransactionDialog } from "@/components/__dashboard/create-transac
 import { History } from "@/components/__dashboard/history";
 import { Overview } from "@/components/__dashboard/overview";
 import { Button } from "@/components/ui/button";
-import prisma from "@/lib/prisma";
 import { currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
-
-async function getSettingsUser(userId: string) {
-  return prisma.user.findUnique({
-    where: {
-      userId,
-    },
-  });
-}
+import { getSettingsUser } from "./__actions/get-settings-user";
 
 export default async function Dashboard() {
   const user = await currentUser();

@@ -13,6 +13,8 @@ import {
 import { cn } from "@/lib/utils";
 import { useForm } from "react-hook-form";
 import {
+  createTransactionFormSchema,
+  CreateTransactionFormSchemaType,
   createTransactionSchema,
   CreateTransactionSchemaType,
 } from "@/schema/transaction";
@@ -51,23 +53,18 @@ export const CreateTransactionDialog = ({
   children,
   type,
 }: CrateTransactionDialogProps) => {
-  const [doc, setDoc] = useState<File | null>(null);
   const [open, setOpen] = useState(false);
 
-  const form = useForm<CreateTransactionSchemaType>({
-    resolver: zodResolver(createTransactionSchema),
+  const form = useForm<CreateTransactionFormSchemaType>({
+    resolver: zodResolver(createTransactionFormSchema),
     defaultValues: {
       type,
       description: "",
       date: new Date(),
       amount: 0,
+      doc: null,
     },
   });
-
-  const handleFileChange = useCallback((value: File | null) => {
-    setDoc(value);
-    // console.log("file", value);
-  }, []);
 
   const handleCategoryChange = useCallback(
     (value: string) => {
@@ -91,12 +88,11 @@ export const CreateTransactionDialog = ({
         amount: 0,
         date: new Date(),
         category: undefined,
-        doc: undefined,
+        doc: null,
       });
-      setDoc(null);
 
       queryClient.invalidateQueries({
-        queryKey: ["overview", "stats"],
+        queryKey: ["overview", "stats", "categories"],
       });
 
       setOpen((prev) => !prev);
@@ -110,17 +106,17 @@ export const CreateTransactionDialog = ({
   });
 
   const onSubmit = useCallback(
-    async (value: CreateTransactionSchemaType) => {
+    async (value: CreateTransactionFormSchemaType) => {
       toast.loading("Creating a new transaction...", {
         id: "create-transaction",
       });
-      let fileURL: string | null = null;
       let fileName: string | null = null;
+      let filePath: string | null = null;
 
-      if (doc) {
+      if (value.doc) {
         try {
-          fileURL = await handleFileUpload(doc);
-          fileName = doc.name;
+          filePath = await handleFileUpload(value.doc);
+          fileName = value.doc.name;
         } catch (error) {
           toast.error("Failed to upload document.", {
             id: "create-transaction",
@@ -131,11 +127,11 @@ export const CreateTransactionDialog = ({
 
       mutate({
         ...value,
-        doc: fileURL && fileName ? { fileName, filePath: fileURL } : undefined,
+        doc: fileName && filePath ? { fileName, filePath } : undefined,
         date: dateToUTCDate(value.date),
       });
     },
-    [doc, mutate]
+    [mutate]
   );
 
   return (
@@ -191,11 +187,15 @@ export const CreateTransactionDialog = ({
             <FormField
               control={form.control}
               name="doc"
-              render={() => (
+              render={({ field: { onChange, value, name } }) => (
                 <FormItem>
                   <FormLabel>Document</FormLabel>
                   <FormControl>
-                    <Dropzone handleFileChange={handleFileChange} doc={doc} />
+                    <Dropzone
+                      handleFileChange={onChange}
+                      value={value}
+                      name={name}
+                    />
                   </FormControl>
                   <FormDescription>
                     Add some pdf for your transaction (optional)
@@ -204,12 +204,12 @@ export const CreateTransactionDialog = ({
               )}
             />
 
-            <div className=" flex items-center justify-between gap-1">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-1">
               <FormField
                 control={form.control}
                 name="category"
                 render={() => (
-                  <FormItem>
+                  <FormItem className="w-full">
                     <div className=" flex flex-col space-y-2 item-start">
                       <FormLabel>Category</FormLabel>
                       <FormControl>
