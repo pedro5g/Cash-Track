@@ -198,7 +198,7 @@ export const CreateCategoryDialog = ({
             />
           </form>
         </Form>
-        <DialogFooter>
+        <DialogFooter className="sm:gap-0 gap-2">
           <DialogClose asChild>
             <Button
               type="button"

@@ -96,7 +96,7 @@ export const CreateTransactionDialog = ({
       setDoc(null);
 
       queryClient.invalidateQueries({
-        queryKey: ["overview"],
+        queryKey: ["overview", "stats"],
       });
 
       setOpen((prev) => !prev);

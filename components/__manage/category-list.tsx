@@ -59,7 +59,7 @@ export const CategoryList = ({ type }: CategoryListProps) => {
         </CardHeader>
         <Separator />
         {!dataAvailable && (
-          <div className="flex h-40 w-full flex-col items-center justify-between">
+          <div className="flex h-40 w-full flex-col items-center justify-center">
             <p>
               No
               <span
