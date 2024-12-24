@@ -137,6 +137,7 @@ const csvConfig = mkConfig({
   fieldSeparator: ",",
   decimalSeparator: ".",
   useKeysAsHeaders: true,
+  filename: "Transactions history",
 });
 
 export const TransactionTable = ({ from, to }: TransactionTableProps) => {
@@ -175,15 +176,16 @@ export const TransactionTable = ({ from, to }: TransactionTableProps) => {
 
   const categoriesOptions = useMemo(() => {
     const categoriesMap = new Map();
-    data?.forEach((transaction) => {
+    (data || []).forEach((transaction) => {
       categoriesMap.set(transaction.category, {
         value: transaction.category,
         label: `${transaction.categoryIcon} ${transaction.category}`,
       });
     });
 
+    //Set does not allow repeated value
     const uniqueCategories = new Set(categoriesMap.values());
-    return Array.from(uniqueCategories);
+    return Array.from(uniqueCategories); // converts in an array
   }, [data]);
 
   return (
