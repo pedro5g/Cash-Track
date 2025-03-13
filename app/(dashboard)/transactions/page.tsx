@@ -4,6 +4,6 @@ export const metadata: Metadata = {
   title: "Transactions",
 };
 
-export default function Transactions() {
+export default async function Transactions() {
   return <Transaction />;
 }

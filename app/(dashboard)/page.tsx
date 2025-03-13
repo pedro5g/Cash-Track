@@ -2,9 +2,8 @@ import { CreateTransactionDialog } from "@/components/__dashboard/create-transac
 import { History } from "@/components/__dashboard/history";
 import { Overview } from "@/components/__dashboard/overview";
 import { Button } from "@/components/ui/button";
-import { currentUser } from "@clerk/nextjs/server";
+import { GetCurrentUser } from "@/hooks/get-current-user";
 import { redirect } from "next/navigation";
-import { getSettingsUser } from "./__actions/get-settings-user";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -12,15 +11,14 @@ export const metadata: Metadata = {
 };
 
 export default async function Dashboard() {
-  const user = await currentUser();
+  const { getUser } = GetCurrentUser();
+  const user = await getUser();
 
   if (!user) {
     redirect("/sign-in");
   }
 
-  const userSettings = await getSettingsUser(user.id);
-
-  if (!userSettings) {
+  if (!user.currency) {
     redirect("/wizard");
   }
 
@@ -29,7 +27,7 @@ export default async function Dashboard() {
       <div className=" border-b bg-card">
         <div className="container flex flex-wrap items-center justify-between gap-6 py-8">
           <p className=" text-3xl font-bold">
-            Hello <span className=" capitalize">{user.firstName}</span> ! 👋
+            Hello <span className=" capitalize">{user.name}</span> ! 👋
           </p>
           <div className=" flex items-center gap-3">
             <CreateTransactionDialog type="income">
@@ -51,8 +49,8 @@ export default async function Dashboard() {
           </div>
         </div>
       </div>
-      <Overview userSettings={userSettings} />
-      <History userSettings={userSettings} />
+      <Overview userSettings={user} />
+      <History userSettings={user} />
     </main>
   );
 }

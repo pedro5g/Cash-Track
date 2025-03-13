@@ -1,8 +1,9 @@
 import { CircleDollarSign } from "lucide-react";
+import Link from "next/link";
 
 export const Logo = () => {
   return (
-    <a href="/" className="flex items-center gap-2">
+    <Link href="/" className="flex items-center gap-2">
       <CircleDollarSign
         className=" stroke size-11 stroke-amber-500
             stroke-2"
@@ -12,6 +13,6 @@ export const Logo = () => {
       leading-tight tracking-tighter text-transparent">
         CashTrack
       </p>
-    </a>
+    </Link>
   );
 };

@@ -1,6 +1,7 @@
+import { GetCurrentUser } from "@/hooks/get-current-user";
 import prisma from "@/lib/prisma";
 import { historyDataSchema } from "@/schema/data";
-import { currentUser } from "@clerk/nextjs/server";
+
 import { getDaysInMonth } from "date-fns";
 import { redirect } from "next/navigation";
 
@@ -103,7 +104,8 @@ async function getHistoryData(
 }
 
 export async function GET(request: Request) {
-  const user = await currentUser();
+  const { getUser } = GetCurrentUser();
+  const user = await getUser();
   if (!user) {
     redirect("sign-in");
   }
@@ -126,7 +128,7 @@ export async function GET(request: Request) {
 
   const { timeFrame, month, year } = params.data;
 
-  const data = await getHistoryData(user.id, timeFrame, month, year);
+  const data = await getHistoryData(user.userId, timeFrame, month, year);
 
   return Response.json(data);
 }

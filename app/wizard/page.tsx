@@ -9,7 +9,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { currentUser } from "@clerk/nextjs/server";
+import { GetCurrentUser } from "@/hooks/get-current-user";
 import { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -19,7 +19,8 @@ export const metadata: Metadata = {
 };
 
 export default async function Wizard() {
-  const user = await currentUser();
+  const { getUser } = GetCurrentUser();
+  const user = await getUser();
 
   if (!user) {
     redirect("/sign-in");
@@ -32,7 +33,7 @@ export default async function Wizard() {
       <h1 className="text-center text-3xl">
         Welcome,
         <span className="ml-2 font-bold capitalize">
-          {user.firstName}
+          {user.name}
           🔥
         </span>
       </h1>

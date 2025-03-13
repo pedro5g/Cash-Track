@@ -1,6 +1,7 @@
+import { GetCurrentUser } from "@/hooks/get-current-user";
 import prisma from "@/lib/prisma";
 import { TransactionType } from "@/lib/types";
-import { currentUser } from "@clerk/nextjs/server";
+
 import { redirect } from "next/navigation";
 import { z } from "zod";
 
@@ -23,7 +24,8 @@ async function getCategories(userId: string, type: TransactionType) {
 }
 
 export async function GET(request: Request) {
-  const user = await currentUser();
+  const { getUser } = GetCurrentUser();
+  const user = await getUser();
 
   if (!user) {
     redirect("/sign-in");
@@ -40,7 +42,7 @@ export async function GET(request: Request) {
 
   const type = queryParams.data;
 
-  const categories = await getCategories(user.id, type);
+  const categories = await getCategories(user.userId, type);
 
   return Response.json(categories);
 }

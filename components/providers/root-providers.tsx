@@ -1,11 +1,12 @@
 "use client";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { NuqsAdapter } from "nuqs/adapters/next/app";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { ThemeProvider } from "next-themes";
 import { useState } from "react";
 
 export const RootProvider = ({ children }: { children: React.ReactNode }) => {
-  const [queryClient] = useState(() => new QueryClient());
+  const [queryClient] = useState(new QueryClient());
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -14,7 +15,7 @@ export const RootProvider = ({ children }: { children: React.ReactNode }) => {
         defaultTheme="dark"
         enableSystem
         disableTransitionOnChange>
-        {children}
+        <NuqsAdapter>{children}</NuqsAdapter>
       </ThemeProvider>
       <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>

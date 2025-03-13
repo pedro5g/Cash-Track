@@ -1,5 +1,5 @@
+import { GetCurrentUser } from "@/hooks/get-current-user";
 import prisma from "@/lib/prisma";
-import { currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 
 export type GetHistoryPeriodsResponseType = Awaited<
@@ -27,13 +27,14 @@ async function getHistoryPeriods(userId: string) {
 }
 
 export async function GET(request: Request) {
-  const user = await currentUser();
+  const { getUser } = GetCurrentUser();
+  const user = await getUser();
 
   if (!user) {
     redirect("/sign-in");
   }
 
-  const periods = await getHistoryPeriods(user.id);
+  const periods = await getHistoryPeriods(user.userId);
 
   return Response.json(periods);
 }

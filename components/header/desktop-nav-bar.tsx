@@ -1,14 +1,12 @@
 import { NAV_LINKS } from "@/constants";
 import { Logo } from "../logo";
 import { NavBarLink } from "./nav-bar-link";
-import { UserButton } from "@clerk/nextjs";
 import { ThemeSwitcher } from "../theme-switcher";
+import { Profile } from "../profile";
 
 export const DesktopNavBar = () => {
   return (
-    <header
-      className=" hidden md:block border-separate 
-    border-b bg-background">
+    <header className=" hidden md:block border-separate border-b bg-background">
       <nav
         className=" container flex items-center justify-between
         px-8">
@@ -24,7 +22,7 @@ export const DesktopNavBar = () => {
         </div>
         <div className="flex items-center gap-4">
           <ThemeSwitcher />
-          <UserButton afterSignOutUrl="/sign-in" />
+          <Profile />
         </div>
       </nav>
     </header>

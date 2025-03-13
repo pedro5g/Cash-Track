@@ -1,6 +1,6 @@
 "use client";
 
-import { deleteTransaction } from "@/app/(dashboard)/__actions/transactions";
+import { deleteTransaction } from "@/app/(dashboard)/_actions/transactions";
 import { GetTransactionHistoryResponse } from "@/app/api/transactions-history/route";
 import {
   AlertDialog,

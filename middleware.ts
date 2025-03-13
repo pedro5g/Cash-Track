@@ -1,13 +1,25 @@
-import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
+import { NextRequest, NextResponse } from "next/server";
+import { isSessionValid } from "@/lib/session";
 
-const isPublicRoute = createRouteMatcher(["/"]);
+const isPublicRoute = ["/sign-in", "/sign-up"];
 
-export default clerkMiddleware((auth, request) => {
-  if (isPublicRoute(request)) {
-    auth().protect();
+export async function middleware(req: NextRequest) {
+  const pathName = req.nextUrl.pathname;
+  const session = await isSessionValid();
+
+  if (isPublicRoute.includes(pathName) && !session) {
+    return NextResponse.next();
   }
-});
+  if (session && isPublicRoute.includes(pathName)) {
+    return NextResponse.redirect(new URL("/", req.url));
+  }
+  if (!session) {
+    return NextResponse.redirect(new URL("/sign-in", req.url));
+  }
+
+  return NextResponse.next();
+}
 
 export const config = {
-  matcher: ["/((?!.*\\..*|_next).*)", "/", "/(api|trpc)(.*)"],
+  matcher: ["/((?!api|_next/static|_next/image|.*\\.png$).*)"],
 };
