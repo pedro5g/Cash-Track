@@ -1,23 +1,19 @@
 "use client";
-import { differenceInDays, startOfMonth } from "date-fns";
-import { useState } from "react";
+import { differenceInDays } from "date-fns";
 import { DateRangePicker } from "../ui/date-range-picker";
 import { toast } from "sonner";
-import { OverviewType } from "@/schema/overview";
 import { StatsCards } from "./stats-cards";
 import { CategoriesStats } from "./categories-stats";
 import { MAX_DATE_RANGE_DAYS } from "@/constants";
 import { UserSettingsType } from "@/lib/types";
+import { useDateQuery } from "@/hooks/use-date-query";
 
 interface OverviewProps {
   userSettings: UserSettingsType;
 }
 
 export const Overview = ({ userSettings }: OverviewProps) => {
-  const [dateRange, setDateRange] = useState<OverviewType>({
-    from: startOfMonth(new Date()),
-    to: new Date(),
-  });
+  const { date, setDate } = useDateQuery();
 
   return (
     <>
@@ -25,8 +21,8 @@ export const Overview = ({ userSettings }: OverviewProps) => {
         <h2 className="text-3xl font-bold">Overview</h2>
         <div className="flex items-center gap-3">
           <DateRangePicker
-            initialDateFrom={dateRange.from}
-            initialDateTo={dateRange.to}
+            initialDateFrom={date.from}
+            initialDateTo={date.to}
             showCompare={false}
             onUpdate={(values) => {
               const { from, to } = values.range;
@@ -37,21 +33,17 @@ export const Overview = ({ userSettings }: OverviewProps) => {
                 );
                 return;
               }
-              setDateRange({ from, to });
+              setDate(from, to);
             }}
           />
         </div>
       </div>
       <div className=" container flex w-full flex-col gap-2">
-        <StatsCards
-          userSettings={userSettings}
-          from={dateRange.from}
-          to={dateRange.to}
-        />
+        <StatsCards userSettings={userSettings} from={date.from} to={date.to} />
         <CategoriesStats
           userSettings={userSettings}
-          from={dateRange.from}
-          to={dateRange.to}
+          from={date.from}
+          to={date.to}
         />
       </div>
     </>

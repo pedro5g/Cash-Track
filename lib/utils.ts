@@ -28,3 +28,26 @@ export function getFormatterCurrency(currency: string) {
     currency,
   });
 }
+
+export function bindCurrency(currency: string): string {
+  const binders = {
+    USD: "$ Dollar",
+    BRL: "R$ Real",
+    EUR: "€ Euro",
+    JPY: "¥ Yen",
+    GBP: "£ Pound",
+  };
+
+  return binders[currency as keyof typeof binders] || "$";
+}
+
+export const getInitials = (name: string) => {
+  const initials = name
+    .trim()
+    .split(" ")
+    .map((c) => c.charAt(0).toUpperCase())
+    .join("")
+    .slice(0, 2);
+
+  return initials || "NA";
+};

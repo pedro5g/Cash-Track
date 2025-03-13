@@ -7,15 +7,63 @@ generator client {
 
 datasource db {
   provider  = "postgresql"
+  // url      = env("DATABASE_URL") // dev mode
   url       = env("POSTGRES_PRISMA_URL")
   directUrl = env("POSTGRES_URL_NON_POOLING")
 }
 
+enum Provider {
+  EMAIL
+  GOOGLE
+
+  @@map("provider_type")
+}
+
 model User {
-  userId   String @id
-  currency String
+  userId          String  @id @default(uuid())
+  name            String
+  email           String  @unique
+  password        String?
+  currency        String
+  isEmailVerified Boolean @default(false) @map("is_email_verified")
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  lastLogin DateTime? @map("last_login")
+  account   Account[]
+  Token     Token[]
 
   @@map("user")
+}
+
+model Account {
+  id                String   @default(cuid())
+  providerIdOrEmail String   @map("provider_id_or_email")
+  provider          Provider
+  profileUrl        String?  @map("profile_url")
+  createdAt         DateTime @default(now()) @map("created_at")
+  user              User     @relation(fields: [userId], references: [userId], onDelete: Cascade)
+  userId            String
+
+  @@id([userId, provider])
+  @@map("account")
+}
+
+enum TokenType {
+  PASSWORD_RECOVER
+
+  @@map("token_type")
+}
+
+model Token {
+  id        String    @id @default(cuid())
+  type      TokenType
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  user   User   @relation(fields: [userId], references: [userId], onDelete: Cascade)
+  userId String @map("user_id")
+
+  @@map("token")
 }
 
 model Category {

@@ -7,7 +7,7 @@ import {
   deleteCategorySchema,
   DeleteCategorySchemaType,
 } from "@/schema/categories";
-import { currentUser } from "@clerk/nextjs/server";
+import { GetCurrentUser } from "@/hooks/get-current-user";
 import { redirect } from "next/navigation";
 
 export async function createCategory(form: CreateCategorySchemaType) {
@@ -16,8 +16,8 @@ export async function createCategory(form: CreateCategorySchemaType) {
   if (!parseBody.success) {
     throw new Error("Bad request");
   }
-
-  const user = await currentUser();
+  const { getUser } = GetCurrentUser();
+  const user = await getUser();
 
   if (!user) {
     redirect("/sign-in");
@@ -27,7 +27,7 @@ export async function createCategory(form: CreateCategorySchemaType) {
 
   return await prisma.category.create({
     data: {
-      userId: user.id,
+      userId: user.userId,
       name,
       icon,
       type,
@@ -41,8 +41,8 @@ export async function deleteCategory(form: DeleteCategorySchemaType) {
   if (!parseBody.success) {
     throw new Error("Bad request");
   }
-
-  const user = await currentUser();
+  const { getUser } = GetCurrentUser();
+  const user = await getUser();
   if (!user) {
     redirect("/sign-in");
   }
@@ -54,7 +54,7 @@ export async function deleteCategory(form: DeleteCategorySchemaType) {
       name_userId_type: {
         name,
         type,
-        userId: user.id,
+        userId: user.userId,
       },
     },
   });

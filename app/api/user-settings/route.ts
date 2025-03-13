@@ -1,29 +1,26 @@
+import { GetCurrentUser } from "@/hooks/get-current-user";
 import prisma from "@/lib/prisma";
-import { currentUser } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 export async function GET(request: Request) {
-  const user = await currentUser();
+  const { getUser } = GetCurrentUser();
+  const user = await getUser();
 
   if (!user) {
     redirect("/sign-in");
   }
 
-  let userSettings = await prisma.user.findUnique({
+  const userSettings = await prisma.user.findUnique({
     where: {
-      userId: user.id,
+      userId: user.userId,
+    },
+    select: {
+      userId: true,
+      currency: true,
     },
   });
 
-  if (!userSettings) {
-    userSettings = await prisma.user.create({
-      data: {
-        userId: user.id,
-        currency: "BRL",
-      },
-    });
-  }
   revalidatePath("/");
   return Response.json(userSettings);
 }

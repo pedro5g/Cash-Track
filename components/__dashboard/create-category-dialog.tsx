@@ -33,7 +33,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import Picker from "@emoji-mart/react";
 import data from "@emoji-mart/data";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { createCategory } from "@/app/(dashboard)/__actions/categories";
+import { createCategory } from "@/app/(dashboard)/_actions/categories";
 import { toast } from "sonner";
 import { useTheme } from "next-themes";
 
@@ -54,6 +54,8 @@ export const CreateCategoryDialog = ({
     resolver: zodResolver(createCategorySchema),
     defaultValues: {
       type,
+      name: "",
+      icon: "",
     },
   });
 

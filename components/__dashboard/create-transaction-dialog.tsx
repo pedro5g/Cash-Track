@@ -15,8 +15,6 @@ import { useForm } from "react-hook-form";
 import {
   createTransactionFormSchema,
   CreateTransactionFormSchemaType,
-  createTransactionSchema,
-  CreateTransactionSchemaType,
 } from "@/schema/transaction";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -37,12 +35,13 @@ import { format } from "date-fns";
 import { CalendarIcon, Loader2 } from "lucide-react";
 import { Calendar } from "../ui/calendar";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { createTransaction } from "@/app/(dashboard)/__actions/transactions";
+import { createTransaction } from "@/app/(dashboard)/_actions/transactions";
 import { toast } from "sonner";
 import { dateToUTCDate } from "@/lib/utils";
 import { Dropzone } from "../dropzone";
 
 import { handleFileUpload } from "@/lib/firebase";
+import { useDateQuery } from "@/hooks/use-date-query";
 
 interface CrateTransactionDialogProps {
   children: React.ReactNode;
@@ -53,6 +52,10 @@ export const CreateTransactionDialog = ({
   children,
   type,
 }: CrateTransactionDialogProps) => {
+  const {
+    date: { from, to },
+  } = useDateQuery();
+
   const [open, setOpen] = useState(false);
 
   const form = useForm<CreateTransactionFormSchemaType>({
@@ -92,7 +95,11 @@ export const CreateTransactionDialog = ({
       });
 
       queryClient.invalidateQueries({
-        queryKey: ["overview", "stats", "categories"],
+        queryKey: ["overview", "stats", from, to],
+      });
+
+      queryClient.invalidateQueries({
+        queryKey: ["overview", "stats", "categories", from, to],
       });
 
       setOpen((prev) => !prev);

@@ -1,7 +1,7 @@
+import { GetCurrentUser } from "@/hooks/get-current-user";
 import prisma from "@/lib/prisma";
 import { getFormatterCurrency } from "@/lib/utils";
 import { overviewQuerySchema } from "@/schema/overview";
-import { currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 
 export type GetTransactionHistoryResponse = Awaited<
@@ -42,7 +42,8 @@ async function getTransactionHistory(userId: string, from: Date, to: Date) {
 }
 
 export async function GET(request: Request) {
-  const user = await currentUser();
+  const { getUser } = GetCurrentUser();
+  const user = await getUser();
 
   if (!user) {
     redirect("/sign-in");
@@ -60,7 +61,7 @@ export async function GET(request: Request) {
   const { from, to } = parse.data;
 
   try {
-    const transactions = await getTransactionHistory(user.id, from, to);
+    const transactions = await getTransactionHistory(user.userId, from, to);
 
     return Response.json(transactions);
   } catch (error) {

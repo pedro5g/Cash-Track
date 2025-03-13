@@ -1,6 +1,6 @@
+import { GetCurrentUser } from "@/hooks/get-current-user";
 import prisma from "@/lib/prisma";
 import { overviewQuerySchema } from "@/schema/overview";
-import { currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 
 export type GetCategoriesStatsResponseType = Awaited<
@@ -31,7 +31,8 @@ async function getCategoriesStats(userId: string, from: Date, to: Date) {
 }
 
 export async function GET(request: Request) {
-  const user = await currentUser();
+  const { getUser } = GetCurrentUser();
+  const user = await getUser();
 
   if (!user) {
     redirect("/sign-in");
@@ -49,7 +50,7 @@ export async function GET(request: Request) {
 
   const { from, to } = queryParams.data;
 
-  const stats = await getCategoriesStats(user.id, from, to);
+  const stats = await getCategoriesStats(user.userId, from, to);
 
   // console.log("stats", stats);
 

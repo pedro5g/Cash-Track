@@ -9,13 +9,13 @@ import { HistoryPeriodSelector } from "./history-period-selector";
 import { useQuery } from "@tanstack/react-query";
 import { SkeletonWrapper } from "../skeleton-wrapper";
 import {
-  BarChart,
   CartesianGrid,
   ResponsiveContainer,
   Tooltip,
   Bar,
   XAxis,
   YAxis,
+  BarChart,
 } from "recharts";
 import { CustomTooltip } from "./custom-tooltip";
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { deleteCategory } from "@/app/(dashboard)/__actions/categories";
+import { deleteCategory } from "@/app/(dashboard)/_actions/categories";
 import { CategoryType } from "@/lib/types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";

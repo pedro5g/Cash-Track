@@ -8,7 +8,7 @@ import {
   deleteTransactionSchema,
   DeleteTransactionSchemaType,
 } from "@/schema/transaction";
-import { currentUser } from "@clerk/nextjs/server";
+import { GetCurrentUser } from "@/hooks/get-current-user";
 import { redirect } from "next/navigation";
 
 export async function createTransaction(form: CreateTransactionSchemaType) {
@@ -18,7 +18,8 @@ export async function createTransaction(form: CreateTransactionSchemaType) {
     throw new Error(parseBody.error.message);
   }
 
-  const user = await currentUser();
+  const { getUser } = GetCurrentUser();
+  const user = await getUser();
 
   if (!user) {
     redirect("/sign-in");
@@ -28,7 +29,7 @@ export async function createTransaction(form: CreateTransactionSchemaType) {
 
   const categoryRow = await prisma.category.findFirst({
     where: {
-      userId: user.id,
+      userId: user.userId,
       name: category,
     },
   });
@@ -41,7 +42,7 @@ export async function createTransaction(form: CreateTransactionSchemaType) {
       // Start prisma $transaction to create a user transaction
       prisma.transaction.create({
         data: {
-          userId: user.id,
+          userId: user.userId,
           amount,
           date,
           description: description ?? "",
@@ -56,14 +57,14 @@ export async function createTransaction(form: CreateTransactionSchemaType) {
       prisma.monthHistory.upsert({
         where: {
           day_month_year_userId: {
-            userId: user.id,
+            userId: user.userId,
             day: date.getUTCDate(),
             month: date.getUTCMonth(),
             year: date.getUTCFullYear(),
           },
         },
         create: {
-          userId: user.id,
+          userId: user.userId,
           day: date.getUTCDate(),
           month: date.getUTCMonth(),
           year: date.getUTCFullYear(),
@@ -83,13 +84,13 @@ export async function createTransaction(form: CreateTransactionSchemaType) {
       prisma.yearHistory.upsert({
         where: {
           month_year_userId: {
-            userId: user.id,
+            userId: user.userId,
             month: date.getUTCMonth(),
             year: date.getUTCFullYear(),
           },
         },
         create: {
-          userId: user.id,
+          userId: user.userId,
           month: date.getUTCMonth(),
           year: date.getUTCFullYear(),
           expense: type === "expense" ? amount : 0,
@@ -123,8 +124,8 @@ export async function updateTransaction(
   if (!parseBody.success) {
     throw new Error(parseBody.error.message);
   }
-
-  const user = await currentUser();
+  const { getUser } = GetCurrentUser();
+  const user = await getUser();
 
   if (!user) {
     redirect("/sign-in");
@@ -134,7 +135,7 @@ export async function updateTransaction(
 
   const categoryRow = await prisma.category.findFirst({
     where: {
-      userId: user.id,
+      userId: user.userId,
       name: category,
     },
   });
@@ -145,7 +146,7 @@ export async function updateTransaction(
 
   const transaction = await prisma.transaction.findUnique({
     where: {
-      userId: user.id,
+      userId: user.userId,
       id: transactionId,
     },
   });
@@ -160,7 +161,7 @@ export async function updateTransaction(
     prisma.transaction.update({
       where: {
         id: transactionId,
-        userId: user.id,
+        userId: user.userId,
       },
       data: {
         amount,
@@ -174,7 +175,7 @@ export async function updateTransaction(
     prisma.monthHistory.update({
       where: {
         day_month_year_userId: {
-          userId: user.id,
+          userId: user.userId,
           day: date.getUTCDate(),
           month: date.getUTCMonth(),
           year: date.getUTCFullYear(),
@@ -206,7 +207,7 @@ export async function updateTransaction(
     prisma.yearHistory.update({
       where: {
         month_year_userId: {
-          userId: user.id,
+          userId: user.userId,
           month: date.getUTCMonth(),
           year: date.getUTCFullYear(),
         },
@@ -242,8 +243,8 @@ export async function deleteTransaction(form: DeleteTransactionSchemaType) {
   if (!parse.success) {
     throw new Error(parse.error.message);
   }
-
-  const user = await currentUser();
+  const { getUser } = GetCurrentUser();
+  const user = await getUser();
 
   if (!user) {
     redirect("/sign-in");
@@ -253,7 +254,7 @@ export async function deleteTransaction(form: DeleteTransactionSchemaType) {
 
   const transaction = await prisma.transaction.findFirst({
     where: {
-      userId: user.id,
+      userId: user.userId,
       id,
     },
   });
@@ -267,13 +268,13 @@ export async function deleteTransaction(form: DeleteTransactionSchemaType) {
       prisma.transaction.delete({
         where: {
           id,
-          userId: user.id,
+          userId: user.userId,
         },
       }),
       prisma.monthHistory.update({
         where: {
           day_month_year_userId: {
-            userId: user.id,
+            userId: user.userId,
             day: transaction.date.getUTCDate(),
             month: transaction.date.getUTCMonth(),
             year: transaction.date.getUTCFullYear(),
@@ -295,7 +296,7 @@ export async function deleteTransaction(form: DeleteTransactionSchemaType) {
       prisma.yearHistory.update({
         where: {
           month_year_userId: {
-            userId: user.id,
+            userId: user.userId,
             month: transaction.date.getUTCMonth(),
             year: transaction.date.getUTCFullYear(),
           },

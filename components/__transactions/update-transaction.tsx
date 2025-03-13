@@ -25,7 +25,7 @@ import { format } from "date-fns";
 import { CalendarIcon, Loader2 } from "lucide-react";
 import { Calendar } from "../ui/calendar";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { updateTransaction } from "@/app/(dashboard)/__actions/transactions";
+import { updateTransaction } from "@/app/(dashboard)/_actions/transactions";
 import { toast } from "sonner";
 import { dateToUTCDate } from "@/lib/utils";
 import { CategoryPicker } from "../__dashboard/category-picker";

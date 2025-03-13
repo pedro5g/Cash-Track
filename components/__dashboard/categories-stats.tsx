@@ -28,8 +28,6 @@ export const CategoriesStats = ({
     queryFn: () => getCategoriesStats(from, to),
   });
 
-  // console.log("Response", data);
-
   const formatter = useMemo(() => {
     return getFormatterCurrency(userSettings.currency);
   }, [userSettings.currency]);
