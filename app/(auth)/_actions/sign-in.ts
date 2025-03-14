@@ -12,45 +12,58 @@ export async function signIn(form: SignInSchemaType) {
   const parsedBody = signInSchema.safeParse(form);
 
   if (!parsedBody.success) {
-    throw new Error("Bad request");
+    return { message: "Bad request." };
   }
   const data = parsedBody.data;
 
-  const user = await prisma.user.findUnique({
-    where: {
-      email: data.email,
-    },
-    select: {
-      ...USER_INFO_SELECT,
-      password: true,
-    },
-  });
 
-  if (!user) {
-    throw new Error("Credentials invalid.");
+  try {
+    const user = await prisma.user.findUnique({
+      where: {
+        email: data.email,
+      },
+      select: {
+        ...USER_INFO_SELECT,
+        password: true,
+      },
+    });
+
+    if (!user) {
+      return { message: "Credentials invalid." };
+    }
+
+    if (!user.password) {
+      return { message: "Please use social login." };
+    }
+
+    const isMatch = await decrypt(data.password, user.password);
+
+    if (!isMatch) {
+      return { message: "Credentials invalid." };
+    }
+
+    const { session, exp } = await createSessionToken({
+      id: user.userId,
+      provider: "EMAIL",
+    });
+
+    (await cookies()).set(COOKIE_KEYS.TOKEN, session, {
+      maxAge: exp! * 1000,
+      path: "/",
+      httpOnly: true,
+      secure: true,
+      sameSite: "strict",
+    });
+    (await cookies()).set(COOKIE_KEYS.USER, JSON.stringify(userDTO(user)), {
+      path: "/",
+      httpOnly: true,
+      secure: true,
+      sameSite: "strict",
+    });
+
+    return { message: "Login Successfully" };
+  } catch (e: any) {
+    return { message: e.message };
   }
 
-  if (!user.password) {
-    throw new Error("Please use social login.");
-  }
-
-  const isMatch = await decrypt(data.password, user.password);
-
-  if (!isMatch) {
-    throw new Error("Credentials invalid.");
-  }
-
-  const { session, exp } = await createSessionToken({
-    id: user.userId,
-    provider: "EMAIL",
-  });
-
-  (await cookies()).set(COOKIE_KEYS.TOKEN, session, {
-    maxAge: exp! * 1000,
-    path: "/",
-    httpOnly: true,
-  });
-  (await cookies()).set(COOKIE_KEYS.USER, JSON.stringify(userDTO(user)));
-
-  return true;
 }

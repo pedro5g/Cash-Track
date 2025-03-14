@@ -29,7 +29,13 @@ export async function updateUserCurrency(currency: string) {
 
   (await cookies()).set(
     COOKIE_KEYS.USER,
-    JSON.stringify({ ...user, currency })
+    JSON.stringify({ ...user, currency }),
+    {
+      path: "/",
+      httpOnly: true,
+      secure: true,
+      sameSite: "strict",
+    }
   );
   revalidatePath("/dashboard");
 
