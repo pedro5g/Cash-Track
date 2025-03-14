@@ -27,7 +27,10 @@ export async function updateUserCurrency(currency: string) {
     },
   });
 
-  (await cookies()).delete(COOKIE_KEYS.USER);
+  (await cookies()).set(
+    COOKIE_KEYS.USER,
+    JSON.stringify({ ...user, currency })
+  );
   revalidatePath("/dashboard");
 
   return userSettings;
