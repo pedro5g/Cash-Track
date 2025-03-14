@@ -16,6 +16,7 @@ export async function signIn(form: SignInSchemaType) {
   }
   const data = parsedBody.data;
 
+
   try {
     const user = await prisma.user.findUnique({
       where: {
@@ -64,4 +65,5 @@ export async function signIn(form: SignInSchemaType) {
   } catch (e: any) {
     return { message: e.message };
   }
+
 }
