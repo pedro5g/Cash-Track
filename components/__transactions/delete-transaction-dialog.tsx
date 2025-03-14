@@ -30,7 +30,13 @@ export const DeleteTransactionDialog = ({
   const queryClient = useQueryClient();
   const { mutate } = useMutation({
     mutationFn: deleteTransaction,
-    onSuccess: async () => {
+    onSuccess: async ({ ok, message }) => {
+      if (!ok) {
+        toast.error(message, {
+          id: transaction.id,
+        });
+        return;
+      }
       toast.success(`Transaction deleted successfully`, {
         id: transaction.id,
       });
@@ -39,10 +45,8 @@ export const DeleteTransactionDialog = ({
         queryKey: ["transaction"],
       });
     },
-    onError: () => {
-      toast.error(`Something went wrong`, {
-        id: transaction.id,
-      });
+    onError: (error) => {
+      console.error(error);
     },
   });
 

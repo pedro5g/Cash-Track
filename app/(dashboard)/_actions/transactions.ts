@@ -15,7 +15,7 @@ export async function createTransaction(form: CreateTransactionSchemaType) {
   const parseBody = createTransactionSchema.safeParse(form);
 
   if (!parseBody.success) {
-    throw new Error(parseBody.error.message);
+    return { ok: false, message: parseBody.error.message };
   }
 
   const { getUser } = GetCurrentUser();
@@ -35,7 +35,10 @@ export async function createTransaction(form: CreateTransactionSchemaType) {
   });
 
   if (!categoryRow) {
-    throw new Error(`The category: ${category} it's not registered.`);
+    return {
+      ok: false,
+      message: `The category: ${category} it's not registered.`,
+    };
   }
   try {
     await prisma.$transaction([
@@ -106,12 +109,13 @@ export async function createTransaction(form: CreateTransactionSchemaType) {
         },
       }),
     ]);
+    return { ok: true, message: "Created successfully" };
   } catch (error) {
     if (doc?.filePath) {
       await handleDeleteFile(doc.filePath);
       // console.log("File deleted to success !");
     }
-    throw new Error(`Something went wrong to create transaction`);
+    return { ok: false, message: "Something went wrong to create transaction" };
   }
 }
 
@@ -122,7 +126,10 @@ export async function updateTransaction(
   const parseBody = createTransactionSchema.safeParse(form);
 
   if (!parseBody.success) {
-    throw new Error(parseBody.error.message);
+    return {
+      ok: false,
+      message: parseBody.error.message,
+    };
   }
   const { getUser } = GetCurrentUser();
   const user = await getUser();
@@ -141,7 +148,10 @@ export async function updateTransaction(
   });
 
   if (!categoryRow) {
-    throw new Error(`The category: ${category} it's not registered.`);
+    return {
+      ok: false,
+      message: `The category: ${category} it's not registered.`,
+    };
   }
 
   const transaction = await prisma.transaction.findUnique({
@@ -152,96 +162,107 @@ export async function updateTransaction(
   });
 
   if (!transaction) {
-    throw new Error("Bad request");
+    return {
+      ok: false,
+      message: "Bad request",
+    };
   }
 
   const difference = amount - transaction.amount;
 
-  await prisma.$transaction([
-    prisma.transaction.update({
-      where: {
-        id: transactionId,
-        userId: user.userId,
-      },
-      data: {
-        amount,
-        description: description ?? "",
-        type,
-        date,
-        category: categoryRow.name,
-        categoryIcon: categoryRow.icon,
-      },
-    }),
-    prisma.monthHistory.update({
-      where: {
-        day_month_year_userId: {
+  try {
+    await prisma.$transaction([
+      prisma.transaction.update({
+        where: {
+          id: transactionId,
           userId: user.userId,
-          day: date.getUTCDate(),
-          month: date.getUTCMonth(),
-          year: date.getUTCFullYear(),
         },
-      },
-      data: {
-        ...(transaction.type === "expense" && {
-          expense:
-            difference < 0
-              ? {
-                  decrement: -difference, // (-) converts difference to positive number
-                }
-              : {
-                  increment: difference,
-                },
-        }),
-        ...(transaction.type === "income" && {
-          income:
-            difference < 0
-              ? {
-                  decrement: -difference,
-                }
-              : {
-                  increment: difference,
-                },
-        }),
-      },
-    }),
-    prisma.yearHistory.update({
-      where: {
-        month_year_userId: {
-          userId: user.userId,
-          month: date.getUTCMonth(),
-          year: date.getUTCFullYear(),
+        data: {
+          amount,
+          description: description ?? "",
+          type,
+          date,
+          category: categoryRow.name,
+          categoryIcon: categoryRow.icon,
         },
-      },
-      data: {
-        ...(transaction.type === "expense" && {
-          expense:
-            difference < 0
-              ? {
-                  decrement: -difference,
-                }
-              : {
-                  increment: difference,
-                },
-        }),
-        ...(transaction.type === "income" && {
-          income:
-            difference < 0
-              ? {
-                  decrement: -difference,
-                }
-              : {
-                  increment: difference,
-                },
-        }),
-      },
-    }),
-  ]);
+      }),
+      prisma.monthHistory.update({
+        where: {
+          day_month_year_userId: {
+            userId: user.userId,
+            day: date.getUTCDate(),
+            month: date.getUTCMonth(),
+            year: date.getUTCFullYear(),
+          },
+        },
+        data: {
+          ...(transaction.type === "expense" && {
+            expense:
+              difference < 0
+                ? {
+                    decrement: -difference, // (-) converts difference to positive number
+                  }
+                : {
+                    increment: difference,
+                  },
+          }),
+          ...(transaction.type === "income" && {
+            income:
+              difference < 0
+                ? {
+                    decrement: -difference,
+                  }
+                : {
+                    increment: difference,
+                  },
+          }),
+        },
+      }),
+      prisma.yearHistory.update({
+        where: {
+          month_year_userId: {
+            userId: user.userId,
+            month: date.getUTCMonth(),
+            year: date.getUTCFullYear(),
+          },
+        },
+        data: {
+          ...(transaction.type === "expense" && {
+            expense:
+              difference < 0
+                ? {
+                    decrement: -difference,
+                  }
+                : {
+                    increment: difference,
+                  },
+          }),
+          ...(transaction.type === "income" && {
+            income:
+              difference < 0
+                ? {
+                    decrement: -difference,
+                  }
+                : {
+                    increment: difference,
+                  },
+          }),
+        },
+      }),
+    ]);
+    return { ok: true, message: "Updated successfully" };
+  } catch (e) {
+    return {
+      ok: false,
+      message: "Something went wrong to update transaction",
+    };
+  }
 }
 
 export async function deleteTransaction(form: DeleteTransactionSchemaType) {
   const parse = deleteTransactionSchema.safeParse(form);
   if (!parse.success) {
-    throw new Error(parse.error.message);
+    return { ok: false, message: parse.error.message };
   }
   const { getUser } = GetCurrentUser();
   const user = await getUser();
@@ -260,7 +281,7 @@ export async function deleteTransaction(form: DeleteTransactionSchemaType) {
   });
 
   if (!transaction) {
-    throw new Error("Bad request");
+    return { ok: false, message: "Bad request" };
   }
 
   try {
@@ -319,7 +340,8 @@ export async function deleteTransaction(form: DeleteTransactionSchemaType) {
       await handleDeleteFile(transaction.filePath);
       // console.log("Transaction deleted with success!");
     }
+    return { ok: true, message: "Deleted successfully" };
   } catch (error) {
-    throw new Error("Something went wrong to delete transaction");
+    return { ok: false, message: "Something went wrong to delete transaction" };
   }
 }

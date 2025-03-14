@@ -25,16 +25,19 @@ export const SignUpForm = () => {
 
   const { mutate, isPending } = useMutation({
     mutationFn: registerUser,
-    onError: (error) => {
-      if (error.message === "NEXT_REDIRECT") {
-        toast.success("Registered successfully", {
-          id: "registration-user",
-        });
-      } else {
+    onSuccess: ({ ok, message }) => {
+      if (!ok) {
         toast.error("Error to registered", {
           id: "registration-user",
         });
+        return;
       }
+      toast.success("Registered successfully", {
+        id: "registration-user",
+      });
+    },
+    onError: (error) => {
+      console.error(error);
     },
   });
 

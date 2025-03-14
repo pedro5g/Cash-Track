@@ -10,7 +10,7 @@ export async function registerUser(form: RegisterUserSchemaType) {
   const parsedBody = registerUserSchema.safeParse(form);
 
   if (!parsedBody.success) {
-    return { message: "Bad request." };
+    return { ok: false, message: "Bad request." };
   }
 
   const data = parsedBody.data;
@@ -29,7 +29,10 @@ export async function registerUser(form: RegisterUserSchemaType) {
         ({ provider }) => provider === "EMAIL"
       );
       if (alreadyEmailAccount) {
-        return { message: "You already have an account, please login" };
+        return {
+          ok: false,
+          message: "You already have an account, please login",
+        };
       }
       const passwordHash = await textToHash(data.password);
 
@@ -76,6 +79,6 @@ export async function registerUser(form: RegisterUserSchemaType) {
 
     return redirect("/sign-in");
   } catch (e: any) {
-    return { message: e.message };
+    return { ok: false, message: e.message };
   }
 }
