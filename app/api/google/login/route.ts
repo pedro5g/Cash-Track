@@ -1,6 +1,8 @@
-import { USER_INFO_SELECT } from "@/constants";
+import { COOKIE_KEYS, USER_INFO_SELECT } from "@/constants";
 import prisma from "@/lib/prisma";
 import { createSessionToken } from "@/lib/session";
+import { userDTO } from "@/lib/utils";
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
 type GoogleTypeResponse = {
@@ -108,6 +110,25 @@ export async function GET(req: Request) {
     });
   }
 
-  await createSessionToken({ id: user.userId, provider: "GOOGLE" });
+  const { session, exp } = await createSessionToken({
+    id: user.userId,
+    provider: "GOOGLE",
+  });
+  (await cookies()).set(COOKIE_KEYS.TOKEN, session, {
+    maxAge: exp! * 1000,
+    path: "/",
+    httpOnly: true,
+  });
+  (await cookies()).set(
+    COOKIE_KEYS.USER,
+    JSON.stringify({
+      userId: user.userId,
+      name: user.name,
+      email: user.email,
+      profileUrl: picture,
+      currency: user.currency,
+    })
+  );
+
   redirect("/wizard");
 }

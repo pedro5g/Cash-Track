@@ -3,8 +3,10 @@
 import prisma from "@/lib/prisma";
 import { signInSchema, SignInSchemaType } from "@/schema/account";
 import { createSessionToken } from "@/lib/session";
-import { redirect } from "next/navigation";
 import { decrypt } from "@/lib/encrypter";
+import { COOKIE_KEYS, USER_INFO_SELECT } from "@/constants";
+import { cookies } from "next/headers";
+import { userDTO } from "@/lib/utils";
 
 export async function signIn(form: SignInSchemaType) {
   const parsedBody = signInSchema.safeParse(form);
@@ -17,6 +19,10 @@ export async function signIn(form: SignInSchemaType) {
   const user = await prisma.user.findUnique({
     where: {
       email: data.email,
+    },
+    select: {
+      ...USER_INFO_SELECT,
+      password: true,
     },
   });
 
@@ -34,10 +40,17 @@ export async function signIn(form: SignInSchemaType) {
     throw new Error("Credentials invalid.");
   }
 
-  await createSessionToken({
+  const { session, exp } = await createSessionToken({
     id: user.userId,
     provider: "EMAIL",
   });
 
-  return redirect("/wizard");
+  (await cookies()).set(COOKIE_KEYS.TOKEN, session, {
+    maxAge: exp! * 1000,
+    path: "/",
+    httpOnly: true,
+  });
+  (await cookies()).set(COOKIE_KEYS.USER, JSON.stringify(userDTO(user)));
+
+  return true;
 }

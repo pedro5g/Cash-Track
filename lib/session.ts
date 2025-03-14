@@ -17,21 +17,18 @@ export async function createSessionToken(payload: PayLoadType) {
 
   const { exp } = await openSessionToken(session);
 
-  (await cookies()).set(COOKIE_KEYS.TOKEN, session, {
-    maxAge: exp! * 1000,
-    path: "/",
-    httpOnly: false,
-  });
+  return { session, exp };
 }
 
 export async function isSessionValid() {
   const sessionCookie = (await cookies()).get(COOKIE_KEYS.TOKEN)?.value;
+  const user = (await cookies()).get(COOKIE_KEYS.USER)?.value;
 
   if (sessionCookie) {
     const value = sessionCookie;
     const { exp } = await openSessionToken(value);
     const now = new Date().getTime();
-    return exp! * 1000 > now;
+    return exp! * 1000 > now && user;
   }
   return false;
 }
