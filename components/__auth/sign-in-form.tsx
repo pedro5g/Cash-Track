@@ -11,8 +11,10 @@ import { toast } from "sonner";
 import Link from "next/link";
 import { signIn } from "@/app/(auth)/_actions/sign-in";
 import { GoogleLink } from "./google-link";
+import { useRouter } from "next/navigation";
 
 export const SignInForm = () => {
+  const router = useRouter();
   const form = useForm<SignInSchemaType>({
     resolver: zodResolver(signInSchema),
     defaultValues: {
@@ -23,16 +25,16 @@ export const SignInForm = () => {
 
   const { mutate, isPending } = useMutation({
     mutationFn: signIn,
+    onSuccess: ({ message }) => {
+      toast.success(message, {
+        id: "sign-in-user",
+      });
+      router.push("/wizard");
+    },
     onError: (error) => {
-      if (error.message === "NEXT_REDIRECT") {
-        toast.success("Login successfully", {
-          id: "sign-in-user",
-        });
-      } else {
-        toast.error(error.message, {
-          id: "sign-in-user",
-        });
-      }
+      toast.error(error.message, {
+        id: "sign-in-user",
+      });
     },
   });
 

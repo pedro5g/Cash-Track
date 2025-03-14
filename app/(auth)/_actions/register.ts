@@ -10,38 +10,61 @@ export async function registerUser(form: RegisterUserSchemaType) {
   const parsedBody = registerUserSchema.safeParse(form);
 
   if (!parsedBody.success) {
-    throw new Error("Bad request");
+    return { message: "Bad request." };
   }
 
   const data = parsedBody.data;
+  try {
+    const userExists = await prisma.user.findUnique({
+      where: {
+        email: data.email,
+      },
+      select: {
+        ...USER_INFO_SELECT,
+      },
+    });
 
-  const userExists = await prisma.user.findUnique({
-    where: {
-      email: data.email,
-    },
-    select: {
-      ...USER_INFO_SELECT,
-    },
-  });
+    if (userExists) {
+      const alreadyEmailAccount = userExists.account.some(
+        ({ provider }) => provider === "EMAIL"
+      );
+      if (alreadyEmailAccount) {
+        return { message: "You already have an account, please login" };
+      }
+      const passwordHash = await textToHash(data.password);
 
-  if (userExists) {
-    const alreadyEmailAccount = userExists.account.some(
-      ({ provider }) => provider === "EMAIL"
-    );
-    if (alreadyEmailAccount) {
-      throw new Error("You already have an account, please login");
+      await prisma.$transaction(async (ctx) => {
+        const user = await ctx.user.update({
+          where: {
+            userId: userExists.userId,
+          },
+          data: {
+            password: passwordHash,
+          },
+        });
+        await ctx.account.create({
+          data: {
+            provider: "EMAIL",
+            providerIdOrEmail: data.email,
+            userId: user.userId,
+          },
+        });
+      });
+      return redirect("/sign-in");
     }
+
     const passwordHash = await textToHash(data.password);
 
     await prisma.$transaction(async (ctx) => {
-      const user = await ctx.user.update({
-        where: {
-          userId: userExists.userId,
-        },
+      const user = await ctx.user.create({
         data: {
+          name: data.name,
+          email: data.email,
           password: passwordHash,
+          currency: "BRL",
         },
       });
+
       await ctx.account.create({
         data: {
           provider: "EMAIL",
@@ -50,29 +73,9 @@ export async function registerUser(form: RegisterUserSchemaType) {
         },
       });
     });
+
     return redirect("/sign-in");
+  } catch (e: any) {
+    return { message: e.message };
   }
-
-  const passwordHash = await textToHash(data.password);
-
-  await prisma.$transaction(async (ctx) => {
-    const user = await ctx.user.create({
-      data: {
-        name: data.name,
-        email: data.email,
-        password: passwordHash,
-        currency: "BRL",
-      },
-    });
-
-    await ctx.account.create({
-      data: {
-        provider: "EMAIL",
-        providerIdOrEmail: data.email,
-        userId: user.userId,
-      },
-    });
-  });
-
-  return redirect("/sign-in");
 }

@@ -1,6 +1,7 @@
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { Currencies } from "./currencies";
+import { PrismaUserType, UserDTOType } from "@/types";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -51,3 +52,14 @@ export const getInitials = (name: string) => {
 
   return initials || "NA";
 };
+
+export function userDTO(input: PrismaUserType): UserDTOType {
+  const [{ profileUrl }] = input.account;
+  return {
+    userId: input.userId,
+    name: input.name,
+    email: input.email,
+    profileUrl: profileUrl,
+    currency: input.currency,
+  };
+}
