@@ -80,7 +80,13 @@ export const CreateTransactionDialog = ({
 
   const { mutate, isPending } = useMutation({
     mutationFn: createTransaction,
-    onSuccess: () => {
+    onSuccess: async ({ ok }) => {
+      if (!ok) {
+        toast.error("Something went wrong ", {
+          id: "create-transaction",
+        });
+      }
+
       toast.success("Transaction created successfully 🎉", {
         id: "create-transaction",
       });
@@ -94,26 +100,24 @@ export const CreateTransactionDialog = ({
         doc: null,
       });
 
-      queryClient.invalidateQueries({
+      await queryClient.invalidateQueries({
         queryKey: ["overview", "stats", from, to],
       });
 
-      queryClient.invalidateQueries({
+      await queryClient.invalidateQueries({
         queryKey: ["overview", "stats", "categories", from, to],
       });
 
       setOpen((prev) => !prev);
     },
     onError: (error) => {
-      console.log("error", error);
-      toast.error("Something went wrong ", {
-        id: "create-transaction",
-      });
+      console.log(error);
     },
   });
 
   const onSubmit = useCallback(
     async (value: CreateTransactionFormSchemaType) => {
+      if (isPending) return;
       toast.loading("Creating a new transaction...", {
         id: "create-transaction",
       });
@@ -138,7 +142,7 @@ export const CreateTransactionDialog = ({
         date: dateToUTCDate(value.date),
       });
     },
-    [mutate]
+    [mutate, isPending]
   );
 
   return (

@@ -3,6 +3,7 @@ import prisma from "@/lib/prisma";
 import { createSessionToken } from "@/lib/session";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { NextRequest, NextResponse } from "next/server";
 
 type GoogleTypeResponse = {
   access_token: string;
@@ -24,7 +25,7 @@ type GoogleUserTypeResponse = {
 
 type RegisterFlow = "not-skip" | "skip";
 
-export async function GET(req: Request) {
+export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
 
   const code = searchParams.get("code");
@@ -52,9 +53,6 @@ export async function GET(req: Request) {
 
     const { sub, name, email, picture, email_verified } = userData;
 
-    /**
-     * this flag
-     */
     let registerFlow: RegisterFlow = "not-skip";
 
     let user = await prisma.user.findUnique({
@@ -126,18 +124,10 @@ export async function GET(req: Request) {
         email: user.email,
         profileUrl: picture,
         currency: user.currency,
-      }),
-      {
-        path: "/",
-        httpOnly: true,
-        secure: true,
-        sameSite: "strict",
-      }
+      })
     );
-
-    redirect("/wizard");
   } catch (e) {
     console.log(e);
-    redirect("/sign-in");
   }
+  redirect("/wizard");
 }

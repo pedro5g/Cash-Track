@@ -12,7 +12,7 @@ export async function signIn(form: SignInSchemaType) {
   const parsedBody = signInSchema.safeParse(form);
 
   if (!parsedBody.success) {
-    return { message: "Bad request." };
+    return { ok: false, message: "Bad request." };
   }
   const data = parsedBody.data;
 
@@ -28,17 +28,17 @@ export async function signIn(form: SignInSchemaType) {
     });
 
     if (!user) {
-      return { message: "Credentials invalid." };
+      return { ok: false, message: "Credentials invalid." };
     }
 
     if (!user.password) {
-      return { message: "Please use social login." };
+      return { ok: false, message: "Please use social login." };
     }
 
     const isMatch = await decrypt(data.password, user.password);
 
     if (!isMatch) {
-      return { message: "Credentials invalid." };
+      return { ok: false, message: "Credentials invalid." };
     }
 
     const { session, exp } = await createSessionToken({
@@ -50,18 +50,11 @@ export async function signIn(form: SignInSchemaType) {
       maxAge: exp! * 1000,
       path: "/",
       httpOnly: true,
-      secure: true,
-      sameSite: "strict",
     });
-    (await cookies()).set(COOKIE_KEYS.USER, JSON.stringify(userDTO(user)), {
-      path: "/",
-      httpOnly: true,
-      secure: true,
-      sameSite: "strict",
-    });
+    (await cookies()).set(COOKIE_KEYS.USER, JSON.stringify(userDTO(user)));
 
-    return { message: "Login Successfully" };
+    return { ok: true, message: "Login Successfully" };
   } catch (e: any) {
-    return { message: e.message };
+    return { ok: false, message: e.message };
   }
 }

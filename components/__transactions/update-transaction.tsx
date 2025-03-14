@@ -63,21 +63,25 @@ export const UpdateTransaction = ({
 
   const { mutate, isPending } = useMutation({
     mutationFn: update,
-    onSuccess: () => {
+    onSuccess: async ({ ok, message }) => {
+      if (!ok) {
+        toast.success("Something went wrong ", {
+          id: "update-transaction",
+        });
+        return;
+      }
       toast.success("Transaction updated successfully 🎉", {
         id: "update-transaction",
       });
 
-      queryClient.invalidateQueries({
+      await queryClient.invalidateQueries({
         queryKey: ["transaction", "history"],
       });
 
       setOpen(!open);
     },
-    onError: () => {
-      toast.success("Something went wrong ", {
-        id: "update-transaction",
-      });
+    onError: (error) => {
+      console.error(error);
     },
   });
 

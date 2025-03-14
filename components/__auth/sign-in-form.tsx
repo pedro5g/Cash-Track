@@ -25,16 +25,20 @@ export const SignInForm = () => {
 
   const { mutate, isPending } = useMutation({
     mutationFn: signIn,
-    onSuccess: ({ message }) => {
+    onSuccess: ({ ok, message }) => {
+      if (!ok) {
+        toast.error(message, {
+          id: "sign-in-user",
+        });
+        return;
+      }
       toast.success(message, {
         id: "sign-in-user",
       });
       router.push("/wizard");
     },
     onError: (error) => {
-      toast.error(error.message, {
-        id: "sign-in-user",
-      });
+      console.error(error);
     },
   });
 
