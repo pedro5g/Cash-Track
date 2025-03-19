@@ -4,7 +4,6 @@ import { USER_INFO_SELECT } from "@/constants";
 import { textToHash } from "@/lib/encrypter";
 import prisma from "@/lib/prisma";
 import { registerUserSchema, RegisterUserSchemaType } from "@/schema/account";
-import { redirect } from "next/navigation";
 
 export async function registerUser(form: RegisterUserSchemaType) {
   const parsedBody = registerUserSchema.safeParse(form);
@@ -53,7 +52,7 @@ export async function registerUser(form: RegisterUserSchemaType) {
           },
         });
       });
-      return redirect("/sign-in");
+      return { ok: true, message: "Registered successfully" };
     }
 
     const passwordHash = await textToHash(data.password);
@@ -77,7 +76,7 @@ export async function registerUser(form: RegisterUserSchemaType) {
       });
     });
 
-    return redirect("/sign-in");
+    return { ok: true, message: "Registered successfully" };
   } catch (e: any) {
     return { ok: false, message: e.message };
   }

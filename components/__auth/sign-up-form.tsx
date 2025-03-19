@@ -11,8 +11,10 @@ import { registerUser } from "@/app/(auth)/_actions/register";
 import { toast } from "sonner";
 import Link from "next/link";
 import { GoogleLink } from "./google-link";
+import { useRouter } from "next/navigation";
 
 export const SignUpForm = () => {
+  const router = useRouter();
   const form = useForm<RegisterUserSchemaType>({
     resolver: zodResolver(registerUserSchema),
     defaultValues: {
@@ -35,6 +37,8 @@ export const SignUpForm = () => {
       toast.success("Registered successfully", {
         id: "registration-user",
       });
+
+      router.push("/sign-in");
     },
     onError: (error) => {
       console.error(error);
